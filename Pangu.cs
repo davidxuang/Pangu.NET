@@ -10,16 +10,16 @@ namespace Pangu
             $"([{_CJK}])[ ]*([\\:]+|\\.)[ ]*([{_CJK}])"
         );
         private static readonly MatchEvaluator _CJK_ToFullwidth_CJK_Evaluator = new MatchEvaluator(
-            match => match.Captures[0].Value
-                   + match.Captures[1].Value.Replace(':', '：').Replace('.', '。')
-                   + match.Captures[2].Value
+            match => match.Groups[1].Value
+                   + match.Groups[2].Value.Replace(':', '：').Replace('.', '。')
+                   + match.Groups[3].Value
             );
         private static readonly Regex _CJK_ToFullwidth = new Regex(
             $"([{_CJK}])[ ]*([~\\!;,\\?]+)[ ]*"
         );
         private static readonly MatchEvaluator _CJK_ToFullwidth_Evaluator = new MatchEvaluator(
-            match => match.Captures[0].Value
-                   + match.Captures[1].Value.Replace('~', '～').Replace('!', '！').Replace(';', '；').Replace(',', '，').Replace('?', '？')
+            match => match.Groups[1].Value
+                   + match.Groups[2].Value.Replace('~', '～').Replace('!', '！').Replace(';', '；').Replace(',', '，').Replace('?', '？')
             );
 
         private static readonly Regex _Dots_CJK = new Regex(
@@ -117,7 +117,7 @@ namespace Pangu
 
         public static void SpacingText(ref string text)
         {
-            if (text.Length <= 1 || _AnyCJK.IsMatch(text)) return;
+            if (text.Length <= 1 || !_AnyCJK.IsMatch(text)) return;
 
             text = _CJK_ToFullwidth_CJK.Replace(text, _CJK_ToFullwidth_CJK_Evaluator);
             text = _CJK_ToFullwidth.Replace(text, _CJK_ToFullwidth_Evaluator);
@@ -162,7 +162,7 @@ namespace Pangu
         public static string SpacingText(string text)
         {
             string output = text;
-            SpacingText(output);
+            SpacingText(ref output);
             return output;
         }
     }
@@ -175,7 +175,7 @@ namespace Pangu.Extensions
         public static string SpacingText(this string text)
         {
             string output = text;
-            Pangu.SpacingText(output);
+            Pangu.SpacingText(ref output);
             return output;
         }
     }
